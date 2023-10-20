@@ -158,12 +158,6 @@ ext.windows.onRemoved.addListener(async () => {
   }
 });
 
-// ext.windows.onUpdatedDarkMode.addListener(async (event, details) => {
-//   try {
-//     await ext.windows.update(event.id, {
-//       icon: details.enabled ? "./assets/128.png" : "./assets/128-dark.png",
-//     });
-//   } catch (error) {
-//     console.log(error, "ext.windows.onUpdatedDarkMode");
-//   }
-// });
+ext.runtime.onMessage.addListener(async (_event, details) => {
+  if (details === "quit") await destroyInstance();
+});

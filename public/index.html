@@ -123,13 +123,18 @@
     <!-- Godot stuff end -->
 
     <script type="module">
+      window.quit = async () => {
+        await ext.runtime.sendMessage("quit");
+      };
+    </script>
+    <script type="module">
       const platformInfo = await ext.runtime.getPlatformInfo();
       const webview = await ext.webviews.getCurrent();
       const window = await ext.webviews.getAttachedWindow(webview.id);
       const insetSize = await ext.windows.getInsetSize(window.id);
 
       if (platformInfo.os !== "mac" && insetSize) {
-        document.getElementById("frame").style.right = insetSize.width;
+        document.getElementById("frame").style.right = `${insetSize.width}px`;
       }
     </script>
   </body>
