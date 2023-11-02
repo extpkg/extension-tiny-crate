@@ -1,11 +1,12 @@
 type Instance = {
   tabId: string;
   windowId: string;
-  webviewId: string;
   websessionId: string;
+  webviewId: string;
 };
 
 let instance: Instance | null = null;
+let lock = false;
 
 const title = "Tiny Crate";
 
@@ -18,24 +19,26 @@ const focusInstance = async () => {
 
 const destroyInstance = async () => {
   if (instance) {
-    await ext.windows.remove(instance.windowId);
-    await ext.tabs.remove(instance.tabId);
     await ext.webviews.remove(instance.webviewId);
     await ext.websessions.remove(instance.websessionId);
+    await ext.windows.remove(instance.windowId);
+    await ext.tabs.remove(instance.tabId);
     instance = null;
   }
 };
 
 ext.runtime.onExtensionClick.addListener(async () => {
-  if (instance) {
+  if (instance || lock) {
     await focusInstance();
     return;
   }
 
-  let webview: ext.webviews.Webview | null = null;
-  let websession: ext.websessions.Websession | null = null;
-  let window: ext.windows.Window | null = null;
+  lock = true;
+
   let tab: ext.tabs.Tab | null = null;
+  let window: ext.windows.Window | null = null;
+  let websession: ext.websessions.Websession | null = null;
+  let webview: ext.webviews.Webview | null = null;
 
   try {
     tab = await ext.tabs.create({
@@ -54,6 +57,7 @@ ext.runtime.onExtensionClick.addListener(async () => {
       maximizable: false,
       title,
       icon: "./assets/128.png",
+      darkMode: true,
       vibrancy: false,
       frame: false,
       titleBarStyle: "inset",
@@ -97,6 +101,7 @@ ext.runtime.onExtensionClick.addListener(async () => {
       websessionId: websession.id,
       webviewId: webview.id,
     };
+    lock = false;
   } catch (error) {
     console.error("ext.runtime.onExtensionClick", JSON.stringify(error));
 
